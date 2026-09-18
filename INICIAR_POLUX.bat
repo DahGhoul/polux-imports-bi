@@ -31,8 +31,8 @@ echo [2/2] Contenedores iniciados.
 echo La primera vez SQL Server y el seed pueden tardar unos segundos.
 echo.
 echo Aplicacion: http://localhost:8080
-echo API:         http://localhost:3000/api/health
-echo Swagger:     http://localhost:3000/docs
+echo API:         http://localhost:8080/proyectobi/health
+echo Swagger:     http://localhost:8080/docs
 echo.
 timeout /t 8 /nobreak >nul
 start http://localhost:8080

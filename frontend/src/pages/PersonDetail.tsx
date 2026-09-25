@@ -26,6 +26,10 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
   const [chat, setChat] = useState<{ role: 'user' | 'agent'; text: string }[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedAltIndex, setSelectedAltIndex] = useState(1);
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [deliveryType, setDeliveryType] = useState('STORE_PICKUP');
+  const [appleSerial, setAppleSerial] = useState('');
+  const [delivering, setDelivering] = useState(false);
 
   // Buscador en vivo de perfiles de negociación
   const [searchQuery, setSearchQuery] = useState('');
@@ -180,6 +184,40 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
     }
   };
 
+  const scrollToAlternatives = () => {
+    const el = document.getElementById('negotiation-alternatives-studio');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('pulse-highlight');
+      setTimeout(() => el.classList.remove('pulse-highlight'), 2200);
+    }
+  };
+
+  const handleStartDelivery = () => {
+    setAppleSerial(`F2LW${Math.floor(Math.random() * 89999 + 10000)}Y6Q`);
+    setShowDeliveryModal(true);
+  };
+
+  const handleConfirmDelivery = async () => {
+    if (!p) return;
+    setDelivering(true);
+    try {
+      const serial = appleSerial.trim() || `F2LW${Math.floor(Math.random() * 89999 + 10000)}Y6Q`;
+      const updated = await api.deliverService(p.id, {
+        deliveryType,
+        appleSerialNumber: serial,
+      });
+      setP(updated);
+      setShowDeliveryModal(false);
+      setToast(`¡Entrega confirmada y póliza AppleCare activada para ${updated.firstName}!`);
+      setTimeout(() => setToast(''), 3000);
+    } catch (e: any) {
+      alert('Error al registrar entrega: ' + e.message);
+    } finally {
+      setDelivering(false);
+    }
+  };
+
   if (!p) return <div className="skeleton-page">Abriendo perfil 360° de negociación…</div>;
 
   const isBuyer = p.stage === 'BUYER';
@@ -208,6 +246,87 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
             setTimeout(() => setToast(''), 2500);
           }}
         />
+      )}
+
+      {showDeliveryModal && (
+        <div className="modal-backdrop" onClick={() => !delivering && setShowDeliveryModal(false)}>
+          <div className="modal-container" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-group">
+                <div className="badge-icon emerald"><PackageCheck size={20} /></div>
+                <div>
+                  <h3>Registrar Entrega del Servicio (Fase CUSTOMERS)</h3>
+                  <p>Cliente: <strong>{p.firstName} {p.lastName}</strong> · DNI: {p.documentNumber || '—'}</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="btn-icon-close" 
+                onClick={() => setShowDeliveryModal(false)}
+                disabled={delivering}
+              >✕</button>
+            </div>
+
+            <div className="modal-body">
+              <div className="info-card-item" style={{ marginBottom: '14px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                <span>Producto a Entregar:</span>
+                <strong style={{ fontSize: '15px' }}>{p.mainProduct}</strong>
+                <small>Importación verificada en Sede Central Av. Larco 840, Trujillo</small>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>
+                  Modalidad de Entrega:
+                </label>
+                <select 
+                  className="consult-select"
+                  value={deliveryType}
+                  onChange={e => setDeliveryType(e.target.value)}
+                >
+                  <option value="STORE_PICKUP">Retiro Presencial en Tienda (Av. Larco 840, Trujillo)</option>
+                  <option value="HOME_DELIVERY">Envío Courier / Delivery a Domicilio en Trujillo</option>
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>
+                  Número de Serie Oficial Apple (12 dígitos de fábrica):
+                </label>
+                <input 
+                  type="text"
+                  className="input-search-negotiation"
+                  style={{ padding: '10px 12px', fontSize: '14px', fontFamily: 'var(--font-mono)' }}
+                  value={appleSerial}
+                  onChange={e => setAppleSerial(e.target.value.toUpperCase())}
+                  placeholder="Ej. F2LW84920Y6Q"
+                />
+                <small style={{ fontSize: '11px', color: '#60a5fa', display: 'block', marginTop: '4px' }}>
+                  * Este serial activará automáticamente la póliza Polux Care de 365 días en la base de datos de Apple.
+                </small>
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button 
+                type="button" 
+                className="btn" 
+                onClick={() => setShowDeliveryModal(false)}
+                disabled={delivering}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button" 
+                className="btn-primary" 
+                style={{ background: '#10b981' }}
+                onClick={handleConfirmDelivery}
+                disabled={delivering}
+              >
+                <CheckCircle2 size={16} /> {delivering ? 'Registrando Entrega…' : 'Confirmar Entrega y Activar Garantía'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Barra de Búsqueda Rápida del Perfil de Negociación */}
@@ -520,7 +639,7 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
           </div>
 
           {/* 6. Estudio de Negociación Comercial · 3 Alternativas para Cierre */}
-          <div className="negotiation-alternatives-studio">
+          <div className="negotiation-alternatives-studio" id="negotiation-alternatives-studio">
             <div className="alternatives-studio-header">
               <div>
                 <span className="section-category-tag" style={{ color: '#c4b5fd' }}>ESTRATEGIA INTELIGENTE · AGENTE NEGOCIADOR</span>
@@ -743,7 +862,14 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
                   <button className="btn primary" disabled={!!busy} onClick={() => act('Evaluación de Negociación actualizada', () => api.negotiationEvaluate(p.id))}>
                     <RefreshCw size={16} /> Evaluar Lead
                   </button>
-                  <button className="btn" disabled={!!busy} onClick={() => act('3 Alternativas comerciales generadas', () => api.proposal(p.id))}>
+                  <button 
+                    className="btn" 
+                    disabled={!!busy} 
+                    onClick={async () => {
+                      await act('3 Alternativas comerciales generadas', () => api.proposal(p.id));
+                      scrollToAlternatives();
+                    }}
+                  >
                     <Sparkles size={16} /> Generar 3 Alternativas
                   </button>
                   <button className="btn success" disabled={!!busy} onClick={() => setShowPaymentModal(true)}>
@@ -774,7 +900,7 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
                   <button className="btn primary" disabled={!!busy} onClick={() => act('Hito logístico avanzado', () => api.shippingAdvance(p.id))}>
                     <Truck size={16} /> Avanzar Hito Logístico
                   </button>
-                  <button className="btn success" onClick={() => nav(`/customers?deliverId=${p.id}`)}>
+                  <button className="btn success" onClick={handleStartDelivery}>
                     <PackageCheck size={16} /> Registrar Entrega en Trujillo
                   </button>
                 </>

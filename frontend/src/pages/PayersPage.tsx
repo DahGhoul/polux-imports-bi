@@ -20,9 +20,41 @@ export default function PayersPage() {
     loadData();
   }, [search]);
 
+  const [deliverTarget, setDeliverTarget] = useState<Person | null>(null);
+  const [deliveryType, setDeliveryType] = useState('STORE_PICKUP');
+  const [appleSerial, setAppleSerial] = useState('');
+  const [delivering, setDelivering] = useState(false);
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3000);
+  };
+
+  const handleStartDelivery = (p: Person) => {
+    setDeliverTarget(p);
+    setAppleSerial(`F2LW${Math.floor(Math.random() * 89999 + 10000)}Y6Q`);
+  };
+
+  const handleConfirmDelivery = async () => {
+    if (!deliverTarget) return;
+    setDelivering(true);
+    try {
+      const serial = appleSerial.trim() || `F2LW${Math.floor(Math.random() * 89999 + 10000)}Y6Q`;
+      const updated = await api.deliverService(deliverTarget.id, {
+        deliveryType,
+        appleSerialNumber: serial,
+      });
+      showToast(`¡Entrega confirmada y garantía AppleCare activada para ${updated.firstName}!`);
+      setDeliverTarget(null);
+      if (selectedPayer?.id === deliverTarget.id) {
+        setSelectedPayer(null);
+      }
+      loadData();
+    } catch (e: any) {
+      alert('Error al registrar entrega: ' + e.message);
+    } finally {
+      setDelivering(false);
+    }
   };
 
   const handleAdvanceShipping = async (p: Person) => {
@@ -216,7 +248,7 @@ export default function PayersPage() {
                             <button
                               type="button"
                               className="btn-table-action primary"
-                              onClick={() => nav(`/customers?deliverId=${p.id}`)}
+                              onClick={() => handleStartDelivery(p)}
                             >
                               Entregar <ArrowRight size={13} />
                             </button>
@@ -382,11 +414,7 @@ export default function PayersPage() {
                   <button
                     type="button"
                     className="btn-primary"
-                    onClick={() => {
-                      const id = selectedPayer.id;
-                      setSelectedPayer(null);
-                      nav(`/customers?deliverId=${id}`);
-                    }}
+                    onClick={() => handleStartDelivery(selectedPayer)}
                   >
                     Proceder a Entrega del Servicio (Fase CUSTOMERS) <ArrowRight size={16} />
                   </button>
@@ -401,6 +429,88 @@ export default function PayersPage() {
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmación de Entrega y Activación de Garantía */}
+      {deliverTarget && (
+        <div className="modal-backdrop" onClick={() => !delivering && setDeliverTarget(null)}>
+          <div className="modal-container" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-group">
+                <div className="badge-icon emerald"><PackageCheck size={20} /></div>
+                <div>
+                  <h3>Registrar Entrega del Servicio (Fase CUSTOMERS)</h3>
+                  <p>Cliente: <strong>{deliverTarget.firstName} {deliverTarget.lastName}</strong> · DNI: {deliverTarget.documentNumber}</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                className="btn-icon-close" 
+                onClick={() => setDeliverTarget(null)}
+                disabled={delivering}
+              >✕</button>
+            </div>
+
+            <div className="modal-body">
+              <div className="info-card-item" style={{ marginBottom: '14px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                <span>Producto a Entregar:</span>
+                <strong style={{ fontSize: '15px' }}>{deliverTarget.mainProduct}</strong>
+                <small>Importación verificada en Sede Central Av. Larco 840, Trujillo</small>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>
+                  Modalidad de Entrega:
+                </label>
+                <select 
+                  className="consult-select"
+                  value={deliveryType}
+                  onChange={e => setDeliveryType(e.target.value)}
+                >
+                  <option value="STORE_PICKUP">Retiro Presencial en Tienda (Av. Larco 840, Trujillo)</option>
+                  <option value="HOME_DELIVERY">Envío Courier / Delivery a Domicilio en Trujillo</option>
+                </select>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '5px' }}>
+                  Número de Serie Oficial Apple (12 dígitos de fábrica):
+                </label>
+                <input 
+                  type="text"
+                  className="input-search-negotiation"
+                  style={{ padding: '10px 12px', fontSize: '14px', fontFamily: 'var(--font-mono)' }}
+                  value={appleSerial}
+                  onChange={e => setAppleSerial(e.target.value.toUpperCase())}
+                  placeholder="Ej. F2LW84920Y6Q"
+                />
+                <small style={{ fontSize: '11px', color: '#60a5fa', display: 'block', marginTop: '4px' }}>
+                  * Este serial activará automáticamente la póliza Polux Care de 365 días en la base de datos de Apple.
+                </small>
+              </div>
+            </div>
+
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button 
+                type="button" 
+                className="btn" 
+                onClick={() => setDeliverTarget(null)}
+                disabled={delivering}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="button" 
+                className="btn-primary" 
+                style={{ background: '#10b981' }}
+                onClick={handleConfirmDelivery}
+                disabled={delivering}
+              >
+                <CheckCircle2 size={16} /> {delivering ? 'Registrando Entrega…' : 'Confirmar Entrega y Activar Garantía'}
+              </button>
             </div>
           </div>
         </div>

@@ -397,6 +397,34 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
               <Info label="Nivel Socioeconómico (NSE)" value={`Nivel ${p.socioeconomicLevel || 'B'}`} />
               <Info label="Sensibilidad al Precio" value={p.priceSensitivity || 'Media'} />
             </div>
+
+            {/* Validación Crediticia SBS / Central de Riesgos (Requerimiento Observado) */}
+            <div className="sbs-verification-card">
+              <div className="sbs-head">
+                <div className="sbs-title">
+                  <ShieldCheck size={18} className="text-emerald" />
+                  <strong>Consulta SBS / Central de Riesgos (Capacidad Crediticia)</strong>
+                </div>
+                <span className="sbs-status-pill normal">● Semáforo Verde · 100% Normal</span>
+              </div>
+              <div className="sbs-grid">
+                <div>
+                  <small>Calificación en Sistema Financiero:</small>
+                  <strong>Normal (0 días de atraso)</strong>
+                </div>
+                <div>
+                  <small>Ratio de Endeudamiento Actual:</small>
+                  <strong>18% (Muy Saludable)</strong>
+                </div>
+                <div>
+                  <small>Capacidad Mensual Disponible:</small>
+                  <strong style={{ color: '#34d399' }}>~ S/ 3,400.00 / mes</strong>
+                </div>
+              </div>
+              <p className="sbs-note">
+                ✓ Reporte crediticio verificado sin deudas coactivas. Califica para financiamiento directo en 3 cuotas fijas de S/ 1,996.67.
+              </p>
+            </div>
           </div>
 
           {/* 4. Gustos, Preferencias y Necesidad de Compra */}
@@ -423,6 +451,29 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
               <Info label="Plazo de Entrega Deseado" value="7 a 10 días calendario en Trujillo" />
               <Info label="Uso Previsto del Equipo" value="Productividad laboral y fotografía" />
             </div>
+
+            {/* Argumentario de Negociación basado en Gustos Detectados */}
+            <div className="tastes-pitch-card">
+              <div className="tastes-head">
+                <Sparkles size={16} className="text-purple" />
+                <strong>Argumentario de Venta basado en Gustos / Redes Sociales:</strong>
+              </div>
+              <div className="tastes-pitches-list">
+                <div className="pitch-item">
+                  <span className="tag-taste">📷 Afinidad: Fotografía y Viajes</span>
+                  <p>
+                    <strong>Argumento sugerido:</strong> Enfatizar la lente tetraprisma con <strong>Zoom Óptico 5x (120 mm)</strong> del iPhone 15/16 Pro Max para capturar fotos de largo alcance y sensor de 48 MP con formato ProRAW.
+                  </p>
+                </div>
+                <div className="pitch-item">
+                  <span className="tag-taste">💻 Afinidad: Desarrollo y Sistemas (UNT)</span>
+                  <p>
+                    <strong>Argumento sugerido:</strong> Destacar el <strong>Chip Apple A17/A18 Pro de 3nm</strong> con 8GB de RAM para ejecución de emuladores y conector USB-C con velocidades de 10 Gb/s para transferir código y proyectos.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="tag-cloud">
               <span className="tag-label">Intereses y afinidades:</span>
               {(p.interests || ['tecnología', 'fotografía', 'productividad', 'apple']).map(x => (

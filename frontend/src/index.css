@@ -5885,6 +5885,231 @@ code {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ==========================================================================
+   VERIFICACIÓN SBS / CENTRAL DE RIESGOS & ARGUMENTARIO DE GUSTOS (DOCENTE)
+   ========================================================================== */
+
+.sbs-verification-card {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+
+.sbs-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sbs-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sbs-title strong {
+  font-size: 13px;
+  color: #a7f3d0;
+}
+
+.sbs-status-pill.normal {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.sbs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 768px) {
+  .sbs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sbs-grid small {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.sbs-grid strong {
+  display: block;
+  font-size: 13px;
+  color: #f8fafc;
+  margin-top: 2px;
+}
+
+.sbs-note {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 10px 0 0;
+  line-height: 1.4;
+}
+
+/* Argumentario de Gustos */
+.tastes-pitch-card {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin: 14px 0;
+}
+
+.tastes-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #c4b5fd;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.tastes-pitches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pitch-item {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.tag-taste {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+.pitch-item p {
+  font-size: 12px;
+  color: #cbd5e1;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.pitch-item p strong {
+  color: #f8fafc;
+}
+
+/* ==========================================================================
+   KPIS DE BI CON MEDIDAS DESGLOSADAS (NUMERADOR / DENOMINADOR / DW TABLE)
+   ========================================================================== */
+
+.expanded-measure-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.kpi-main-val {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 6px 0;
+  display: block;
+  font-family: var(--font-mono);
+}
+
+.kpi-formula-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formula-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #93c5fd;
+  font-family: var(--font-mono);
+  background: rgba(59, 130, 246, 0.15);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.measures-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 6px;
+}
+
+.measures-breakdown small {
+  display: block;
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.measures-breakdown strong {
+  display: block;
+  font-size: 11px;
+  color: #e2e8f0;
+  margin-top: 2px;
+}
+
+.kpi-dw-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 5px;
+}
+
+.kpi-dw-tag code {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+.kpi-target-foot {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: block;
+  margin-top: auto;
+}
+
+
 
 
 

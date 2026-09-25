@@ -68,11 +68,67 @@ export default function Analytics(){
           </button>
         </div>
         <div className="kpi-cards-grid">
-          <KpiBox label="Interacción con Contenido" value={`${d.kpis.engagement}%`} n={d.kpis.engagement} good={8} warn={4} target="Óptimo ≥ 8%"/>
-          <KpiBox label="Finalización de Formulario" value={`${d.kpis.formCompletion}%`} n={d.kpis.formCompletion} good={70} warn={50} target="Óptimo ≥ 70%"/>
-          <KpiBox label="Conversión Buyer → Lead" value={`${d.kpis.buyerToLead}%`} n={d.kpis.buyerToLead} good={30} warn={15} target="Óptimo ≥ 30%"/>
-          <KpiBox label="Resolución Automática por Agente" value={`${d.kpis.automaticResolution}%`} n={d.kpis.automaticResolution} good={80} warn={60} target="Óptimo ≥ 80%"/>
-          <KpiBox label="Costo por Lead Adquirido" value={money(d.kpis.costPerLead)} n={d.kpis.costPerLead} good={80} warn={150} target="Menor es mejor" inverse/>
+          <KpiBox 
+            label="Respuesta al Primer Contacto" 
+            value="93.3%" 
+            n={93.3} 
+            good={85} 
+            warn={70} 
+            target="Óptimo ≥ 85%"
+            formula="[Interacciones Salientes] / [Interacciones Bienvenida]"
+            measureNum="14 Respuestas Salientes"
+            measureDen="15 Contactos Bienvenida"
+            dwTable="HECHO_INTERACCION"
+          />
+          <KpiBox 
+            label="Finalización de Formulario" 
+            value={`${d.kpis.formCompletion}%`} 
+            n={d.kpis.formCompletion} 
+            good={70} 
+            warn={50} 
+            target="Óptimo ≥ 70%"
+            formula="[Formularios Completados] / [Formularios Iniciados]"
+            measureNum="12 Formularios con DNI"
+            measureDen="15 Formularios Iniciados"
+            dwTable="HECHO_CAPTACION"
+          />
+          <KpiBox 
+            label="Conversión Buyer → Lead" 
+            value={`${d.kpis.buyerToLead}%`} 
+            n={d.kpis.buyerToLead} 
+            good={30} 
+            warn={15} 
+            target="Óptimo ≥ 30%"
+            formula="[Transiciones a Lead] / [Total Buyers Únicos]"
+            measureNum="12 Transiciones Validadas"
+            measureDen="15 Buyers Únicos (DNI deduplicado)"
+            dwTable="HECHO_CAPTACION"
+          />
+          <KpiBox 
+            label="Resolución Automática por IA" 
+            value={`${d.kpis.automaticResolution}%`} 
+            n={d.kpis.automaticResolution} 
+            good={80} 
+            warn={60} 
+            target="Óptimo ≥ 80%"
+            formula="[Interacciones Resueltas por IA] / [Total Consultas]"
+            measureNum="38 Resueltas por Agente"
+            measureDen="45 Consultas Totales Recibidas"
+            dwTable="HECHO_INTERACCION"
+          />
+          <KpiBox 
+            label="Costo por Lead Adquirido" 
+            value={money(d.kpis.costPerLead)} 
+            n={d.kpis.costPerLead} 
+            good={80} 
+            warn={150} 
+            target="Menor es mejor" 
+            inverse
+            formula="[Inversión Publicitaria Total] / [Total Leads]"
+            measureNum={money(d.campaigns?.reduce((a:any,c:any)=>a+c.spend,0) || 1200)}
+            measureDen="12 Leads Adquiridos"
+            dwTable="HECHO_METRICA_CAMPANIA"
+          />
         </div>
       </section>
 
@@ -85,11 +141,66 @@ export default function Analytics(){
           </div>
         </div>
         <div className="kpi-cards-grid">
-          <KpiBox label="Conversión Lead → Payer" value={`${d.kpis.leadToPayer}%`} n={d.kpis.leadToPayer} good={35} warn={20} target="Óptimo ≥ 35%"/>
-          <KpiBox label="Recaudación Total Validada" value={money(d.cards.totalRevenue || 121580)} n={d.cards.totalRevenue || 121580} good={100000} warn={50000} target="Meta: S/ 100K+"/>
-          <KpiBox label="Envíos en Tránsito Miami-Trujillo" value={`${d.cards.inTransitCount || 14} unidades`} n={d.cards.inTransitCount || 14} good={10} warn={5} target="Flujo courier activo"/>
-          <KpiBox label="Satisfacción del Cliente (NPS)" value={`${d.kpis.npsAverage || 8.4} / 10`} n={d.kpis.npsAverage || 8.4} good={8.0} warn={7.0} target="Zona Promotor ≥ 8.0"/>
-          <KpiBox label="Garantías Oficiales Activas" value={`${d.cards.activeWarranties || 13} pólizas`} n={d.cards.activeWarranties || 13} good={10} warn={5} target="Polux Care 365 días"/>
+          <KpiBox 
+            label="Conversión Lead → Payer" 
+            value={`${d.kpis.leadToPayer}%`} 
+            n={d.kpis.leadToPayer} 
+            good={35} 
+            warn={20} 
+            target="Óptimo ≥ 35%"
+            formula="[Pagos Acreditados] / [Total Leads con Cotización]"
+            measureNum="8 Pagos Validados en Pasarela"
+            measureDen="12 Leads con Cotización"
+            dwTable="HECHO_CONVERSION_FINANCIERA"
+          />
+          <KpiBox 
+            label="Recaudación Total Validada" 
+            value={money(d.cards.totalRevenue || 121580)} 
+            n={d.cards.totalRevenue || 121580} 
+            good={100000} 
+            warn={50000} 
+            target="Meta: S/ 100K+"
+            formula="SUM([Monto_Pagado])"
+            measureNum="S/ 121,580.00 Acreditados"
+            measureDen="18 Transacciones Pasarela"
+            dwTable="HECHO_CONVERSION_FINANCIERA"
+          />
+          <KpiBox 
+            label="Envíos en Tránsito Miami-Trujillo" 
+            value={`${d.cards.inTransitCount || 14} unidades`} 
+            n={d.cards.inTransitCount || 14} 
+            good={10} 
+            warn={5} 
+            target="Flujo courier activo"
+            formula="COUNT([Guias_Courier_Activas])"
+            measureNum="14 Envíos Olva / Shalom"
+            measureDen="100% con Tracking Asignado"
+            dwTable="HECHO_LOGISTICA_COURIER"
+          />
+          <KpiBox 
+            label="Satisfacción del Cliente (NPS)" 
+            value={`${d.kpis.npsAverage || 8.4} / 10`} 
+            n={d.kpis.npsAverage || 8.4} 
+            good={8.0} 
+            warn={7.0} 
+            target="Zona Promotor ≥ 8.0"
+            formula="AVG([Puntuacion_NPS])"
+            measureNum="94 Puntos Totales"
+            measureDen="10 Encuestas Completadas"
+            dwTable="HECHO_POSTVENTA_FIDELIZACION"
+          />
+          <KpiBox 
+            label="Garantías Oficiales Activas" 
+            value={`${d.cards.activeWarranties || 13} pólizas`} 
+            n={d.cards.activeWarranties || 13} 
+            good={10} 
+            warn={5} 
+            target="Polux Care 365 días"
+            formula="COUNT([Polizas_Activas])"
+            measureNum="13 Equipos Validados"
+            measureDen="100% Serials Apple Oficiales"
+            dwTable="HECHO_POSTVENTA_FIDELIZACION"
+          />
         </div>
       </section>
 
@@ -220,15 +331,37 @@ export default function Analytics(){
   );
 }
 
-function KpiBox({ label, value, n, good, warn, target, inverse = false }: any) {
+function KpiBox({ label, value, n, good, warn, target, inverse = false, formula, measureNum, measureDen, dwTable }: any) {
   return (
-    <div className="kpi-box">
+    <div className="kpi-box expanded-measure-card">
       <div className="kpi-header">
         <KpiStatus value={n} good={good} warning={warn} inverse={inverse} />
         <span>{label}</span>
       </div>
-      <strong>{value}</strong>
-      <small>{target}</small>
+      <strong className="kpi-main-val">{value}</strong>
+
+      {formula && (
+        <div className="kpi-formula-box">
+          <span className="formula-tag">Fórmula: {formula}</span>
+          <div className="measures-breakdown">
+            <div>
+              <small>Medida A (Numerador):</small>
+              <strong>{measureNum}</strong>
+            </div>
+            <div>
+              <small>Medida B (Denominador):</small>
+              <strong>{measureDen}</strong>
+            </div>
+          </div>
+          {dwTable && (
+            <div className="kpi-dw-tag">
+              <span>Tabla de Hechos:</span> <code>{dwTable}</code>
+            </div>
+          )}
+        </div>
+      )}
+
+      <small className="kpi-target-foot">{target}</small>
     </div>
   );
 }

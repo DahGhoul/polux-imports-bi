@@ -23,6 +23,8 @@ export default function App(){
           <Route path="/buyers/:id" element={<PersonDetail/>}/>
           <Route path="/leads" element={<PeoplePage stage="LEAD"/>}/>
           <Route path="/leads/:id" element={<PersonDetail/>}/>
+          <Route path="/negotiation-profile" element={<PersonDetail defaultToLead={true}/>}/>
+          <Route path="/negotiation-profile/:id" element={<PersonDetail/>}/>
           <Route path="/payers" element={<PayersPage/>}/>
           <Route path="/payers/:id" element={<PersonDetail/>}/>
           <Route path="/customers" element={<CustomersPage/>}/>

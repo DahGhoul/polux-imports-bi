@@ -3,7 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   BarChart3, Bot, ChevronRight, CreditCard, HeartHandshake, 
   LayoutDashboard, Megaphone, ShieldCheck, Target, UsersRound, 
-  Sparkles, ExternalLink, Compass, Truck
+  Sparkles, ExternalLink, Compass, Truck, UserCheck
 } from 'lucide-react';
 import DemoTourBar from './DemoTourBar';
 import PaymentGatewayModal from './PaymentGatewayModal';
@@ -14,6 +14,7 @@ const nav = [
   { section:'EMBUDO COMERCIAL (IMPULSE)' },
   { to:'/buyers', label:'Buyers (Captación)', stage:'Fase 1', icon:UsersRound },
   { to:'/leads', label:'Leads (Negociación)', stage:'Fase 2', icon:Target },
+  { to:'/negotiation-profile', label:'Perfil de Negociación', stage:'360°', icon:UserCheck },
   { to:'/payers', label:'Payers (Finanzas & Courier)', stage:'Fase 3', icon:CreditCard },
   { to:'/customers', label:'Customers (Fidelización & CRM)', stage:'Fase 4', icon:HeartHandshake },
   
@@ -37,7 +38,9 @@ export default function Layout(){
   const [showGlobalPaymentModal, setShowGlobalPaymentModal] = useState(false);
   const [showDemoTour, setShowDemoTour] = useState(false);
 
-  const title = location.pathname.startsWith('/buyers')
+  const title = location.pathname.startsWith('/negotiation-profile')
+    ? 'Perfil de Negociación 360° · Expediente Integral del Lead'
+    : location.pathname.startsWith('/buyers')
     ? 'BUYERS · Captación e Intención Comercial (Fase 1)'
     : location.pathname.startsWith('/leads')
     ? 'LEADS · Negociación y Propuestas Comerciales (Fase 2)'

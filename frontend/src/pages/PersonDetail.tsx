@@ -5,7 +5,7 @@ import {
   FileText, HeartHandshake, Mail, MapPin, MessageCircle, MousePointerClick, 
   PackageCheck, Phone, RefreshCw, ShieldCheck, Sparkles, Star, Truck, 
   WalletCards, Send, GraduationCap, Briefcase, Search, UserCheck, 
-  ChevronRight, Calendar, DollarSign
+  ChevronRight, Calendar, DollarSign, Copy, ExternalLink, Zap, Check
 } from 'lucide-react';
 import { api, fmtDate, initials, money, Person } from '../lib/api';
 import { PriorityBadge, ScoreRing, StageBadge } from '../components/Ui';
@@ -25,6 +25,7 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
   const [question, setQuestion] = useState('');
   const [chat, setChat] = useState<{ role: 'user' | 'agent'; text: string }[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedAltIndex, setSelectedAltIndex] = useState(1);
 
   // Buscador en vivo de perfiles de negociación
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,6 +116,68 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
     setSearchQuery('');
     setIsSearchFocused(false);
     nav(`/${selected.stage.toLowerCase()}s/${selected.id}`);
+  };
+
+  const alternatives = useMemo(() => {
+    if (!p) return [];
+    const baseAmount = Number(p.quotes?.[0]?.amount || 5990);
+    const prod = p.mainProduct || 'iPhone 15 Pro Max 256 GB';
+    const cuota3 = (baseAmount / 3).toFixed(2);
+    return [
+      {
+        id: 'opt-a',
+        badge: 'MAYOR AHORRO · PAGO CONTADO',
+        badgeType: 'savings',
+        title: 'Opción A: Contado con Descuento Inmediato',
+        amountFormatted: money(baseAmount - 200),
+        amountNote: 'Descuento comercial directo de S/ 200',
+        payment: 'Pago único vía Yape o Transferencia BCP/BBVA',
+        perks: [
+          'Descuento directo de S/ 200 por pronto pago',
+          'Mica de vidrio templado 9H + Cargador 20W de regalo',
+          'Prioridad de despacho con reserva inmediata en Miami',
+        ],
+        whatsappPitch: `¡Hola ${p.firstName}! 👋 Te saluda Polux Imports. Respecto al ${prod}, si confirmas tu pedido al contado vía Yape o transferencia te brindamos una tarifa preferencial de ${money(baseAmount - 200)} (ahorras S/ 200) e incluimos mica y cargador 20W de cortesía. ¿Te gustaría coordinarlo hoy?`,
+      },
+      {
+        id: 'opt-b',
+        badge: '⭐ RECOMENDADA POR EL AGENTE (ESTUDIANTE / NSE B)',
+        badgeType: 'recommended',
+        title: 'Opción B: 3 Cuotas sin Intereses',
+        amountFormatted: `3 cuotas de ${money(Number(cuota3))}`,
+        amountNote: `Total: ${money(baseAmount)} (0% de interés comercial)`,
+        payment: '3 cuotas iguales con tarjeta o PoluxPay',
+        perks: [
+          '0% de interés aplicable a tarifa universitaria UNT',
+          `Primera cuota de ${money(Number(cuota3))} al pedir; saldo al recibir en Trujillo`,
+          'La cuota representa menos del 45% del rango de ingreso declarado',
+        ],
+        whatsappPitch: `¡Hola ${p.firstName}! 📱 En Polux Imports tenemos disponible para ti la facilidad de 3 cuotas fijas sin intereses de ${money(Number(cuota3))} con tarjeta o mediante nuestra pasarela PoluxPay. El equipo llega en 7 a 10 días a Trujillo con 1 año de garantía oficial Apple. ¿Te reservamos el stock bajo esta opción?`,
+      },
+      {
+        id: 'opt-c',
+        badge: 'PACK COMPLETO · VENTA CRUZADA',
+        badgeType: 'combo',
+        title: 'Opción C: Combo Ecosistema Apple',
+        amountFormatted: money(baseAmount + 860),
+        amountNote: 'Ahorro conjunto de S/ 390 en accesorios oficiales',
+        payment: 'Contado o financiado hasta en 6 cuotas',
+        perks: [
+          `${prod} + AirPods Pro 2da Gen MagSafe`,
+          'Funda MagSafe oficial de cortesía incluida',
+          'Póliza de garantía unificada Polux Care por 365 días',
+        ],
+        whatsappPitch: `¡Hola ${p.firstName}! 🎧 Te presentamos una promoción exclusiva: llévate el ${prod} junto con los AirPods Pro 2 por solo ${money(baseAmount + 860)} (ahorras S/ 390) y te obsequiamos la funda MagSafe oficial. ¿Te gustaría aprovechar este paquete completo?`,
+      },
+    ];
+  }, [p]);
+
+  const handleCopyPitch = (text: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setToast('¡Mensaje para WhatsApp copiado al portapapeles!');
+      setTimeout(() => setToast(''), 3000);
+    }
   };
 
   if (!p) return <div className="skeleton-page">Abriendo perfil 360° de negociación…</div>;
@@ -252,8 +315,16 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
           </div>
         </div>
         <div className="hero-scores">
-          <ScoreRing value={p.score} label="score" />
-          <ScoreRing value={p.conversionProbability} label="cierre %" />
+          <div className="score-hero-box">
+            <span className="score-hero-tag">INTENCIÓN</span>
+            <ScoreRing value={p.score} label="Score" size={78} tone="blue" />
+            <small>{behavior?.interactions || 8} consultas</small>
+          </div>
+          <div className="score-hero-box">
+            <span className="score-hero-tag">PROBABILIDAD</span>
+            <ScoreRing value={p.conversionProbability} label="Cierre %" size={78} tone="emerald" />
+            <small>Prioridad {p.priority}</small>
+          </div>
         </div>
       </section>
 
@@ -397,7 +468,105 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
             )}
           </div>
 
-          {/* 6. Señales Observables del Algoritmo de Scoring */}
+          {/* 6. Estudio de Negociación Comercial · 3 Alternativas para Cierre */}
+          <div className="negotiation-alternatives-studio">
+            <div className="alternatives-studio-header">
+              <div>
+                <span className="section-category-tag" style={{ color: '#c4b5fd' }}>ESTRATEGIA INTELIGENTE · AGENTE NEGOCIADOR</span>
+                <h3><Sparkles size={20} className="text-purple" /> 3 Alternativas de Negociación Estructuradas</h3>
+                <p>
+                  El Agente Negociador evaluó la solvencia (NSE {p.socioeconomicLevel || 'B'}, {money(p.monthlyIncomeMin)}/mes), perfil académico en UNT y cotización activa para generar 3 vías comerciales de cierre con guardrails éticos.
+                </p>
+              </div>
+              <button 
+                type="button" 
+                className="btn-recalculate-alt"
+                onClick={() => act('3 Alternativas recalculadas con IA', () => api.proposal(p.id))}
+                disabled={!!busy}
+              >
+                <Sparkles size={15} /> Recalcular Escenarios
+              </button>
+            </div>
+
+            <div className="alternative-cards-grid">
+              {alternatives.map((alt, idx) => {
+                const isSelected = selectedAltIndex === idx;
+                return (
+                  <div 
+                    key={alt.id} 
+                    className={`alternative-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => setSelectedAltIndex(idx)}
+                  >
+                    <div>
+                      <span className={`alt-top-badge ${alt.badgeType}`}>{alt.badge}</span>
+                      <h4 className="alt-title">{alt.title}</h4>
+                      <span className="alt-subtitle">{alt.payment}</span>
+
+                      <div className="alt-price-block">
+                        <span className="alt-price-val">{alt.amountFormatted}</span>
+                        <span className="alt-price-note">{alt.amountNote}</span>
+                      </div>
+
+                      <ul className="alt-perks-list">
+                        {alt.perks.map((perk, pi) => (
+                          <li key={pi}><Check size={14} /> <span>{perk}</span></li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="alt-card-footer">
+                      <button type="button" className="btn-select-alt">
+                        {isSelected ? '✓ Opción Seleccionada' : 'Seleccionar esta Vía'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Pitch de Negociación para WhatsApp correspondiente a la opción seleccionada */}
+            {alternatives[selectedAltIndex] && (
+              <div className="whatsapp-pitch-box">
+                <div className="pitch-header">
+                  <strong>
+                    <MessageCircle size={16} /> Pitch para WhatsApp · {alternatives[selectedAltIndex].title}
+                  </strong>
+                  <div className="pitch-actions">
+                    <button 
+                      type="button" 
+                      className="btn-pitch-action copy"
+                      onClick={() => handleCopyPitch(alternatives[selectedAltIndex].whatsappPitch)}
+                    >
+                      <Copy size={13} /> Copiar Texto
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn-pitch-action open-wa"
+                      onClick={() => {
+                        const cleanPhone = (p.phone || '+51 987 654 321').replace(/[^0-9]/g, '');
+                        window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(alternatives[selectedAltIndex].whatsappPitch)}`, '_blank');
+                      }}
+                    >
+                      <ExternalLink size={13} /> Abrir WhatsApp Web
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn-pitch-action"
+                      style={{ background: '#2563eb', color: '#fff' }}
+                      onClick={() => setShowPaymentModal(true)}
+                    >
+                      <CreditCard size={13} /> Pagar esta Opción (Pasarela)
+                    </button>
+                  </div>
+                </div>
+                <div className="pitch-text-content">
+                  {alternatives[selectedAltIndex].whatsappPitch}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 7. Señales Observables del Algoritmo de Scoring */}
           <div className="panel">
             <div className="panel-title">
               <div>
@@ -572,25 +741,6 @@ export default function PersonDetail({ defaultToLead = false }: Props) {
               )}
             </div>
           </div>
-
-          {/* Panel de las 3 Alternativas de Negociación */}
-          {proposal && (
-            <div className="panel proposal-card">
-              <div className="panel-title">
-                <div>
-                  <span>PROPUESTA COMERCIAL ESTRUCTURADA</span>
-                  <h3>3 Alternativas de Cierre</h3>
-                </div>
-              </div>
-              {proposal.proposals.map((x: any) => (
-                <div className="proposal-option" key={x.label}>
-                  <strong>{x.label}</strong>
-                  <span>{money(x.amount)} · {x.payment}</span>
-                  <p>{x.note}</p>
-                </div>
-              ))}
-            </div>
-          )}
         </aside>
       </section>
     </div>

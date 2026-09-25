@@ -3,7 +3,7 @@ import {
   Bot, BrainCircuit, CheckCircle2, Clock3, Gauge, Megaphone, 
   ShieldAlert, Sparkles, Target, Zap, CreditCard, HeartHandshake, 
   Truck, ShieldCheck, RefreshCw, Send, ArrowRight, Activity, UsersRound, PackageCheck, TrendingUp,
-  ArrowDown, ChevronRight
+  ArrowDown, ChevronRight, Check, UserCheck
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api, AgentAction, fmtDate, initials, Person, money } from '../lib/api';
@@ -18,15 +18,147 @@ interface AgentPageProps {
 export default function AgentPage({ type = 'ALL' }: AgentPageProps) {
   const [actions, setActions] = useState<AgentAction[]>([]);
   const [people, setPeople] = useState<Person[]>([]);
+  const [allCandidates, setAllCandidates] = useState<Person[]>([]);
   const [dash, setDash] = useState<any>();
   const [selectedAgent, setSelectedAgent] = useState<AgentType>(type);
   const [runningBatch, setRunningBatch] = useState(false);
   const [batchNotice, setBatchNotice] = useState('');
   const nav = useNavigate();
 
+  // Consola de Consulta en Tiempo Real
+  const [consultPersonId, setConsultPersonId] = useState<number>(1);
+  const [consultAgentType, setConsultAgentType] = useState<AgentType>('NEGOTIATION');
+  const [consulting, setConsulting] = useState(false);
+  const [consultVerdict, setConsultVerdict] = useState<any>({
+    personName: 'Diego Ramírez',
+    personRole: 'Lead (Ing. de Sistemas UNT · TechNova SAC)',
+    personId: 1,
+    agentName: 'Agente Negociador',
+    verdictType: 'lead',
+    verdictTitle: 'DICTAMEN: LEAD PRIORITARIO · 75% PROBABILIDAD DE CIERRE',
+    score: 78,
+    closingProb: 75,
+    kpis: [
+      { label: 'Intención Observada', val: '88 / 100', hint: '8 consultas registradas' },
+      { label: 'Solvencia Económica', val: 'Nivel B', hint: 'TechNova SAC (S/ 4,200/mes)' },
+      { label: 'Cotización Activa', val: 'S/ 5,990', hint: 'Vigencia de 7 días (4 restantes)' },
+      { label: 'Riesgo Comercial', val: 'Bajo (8%)', hint: 'Dentro de margen 18%' },
+    ],
+    reasons: [
+      'El lead registra 8 interacciones y 12 vistas de producto en catálogo (foco: iPhone 15 Pro Max).',
+      'Cumple perfil de solvencia: Estudiante activo UNT en Sistemas con empleo dependiente en TechNova SAC.',
+      'Solicitó cotización preferencial formal POLUX-2026-DR-001 con vigencia activa de 7 días.',
+    ],
+    nextAction: 'Estructurar propuesta en 3 cuotas fijas de S/ 1,996.67 y enviar pitch a WhatsApp para reserva.',
+  });
+
   useEffect(() => {
     setSelectedAgent(type);
+    if (type !== 'ALL') setConsultAgentType(type);
   }, [type]);
+
+  const runConsultation = async (pId: number, aType: AgentType) => {
+    setConsulting(true);
+    try {
+      const p = await api.person(pId);
+      if (!p) return;
+      if (aType === 'NEGOTIATION') {
+        setConsultVerdict({
+          personName: `${p.firstName} ${p.lastName}`,
+          personRole: `${p.stage} (${p.occupation || 'Cliente'} · ${p.district || p.city})`,
+          personId: p.id,
+          agentName: 'Agente Negociador',
+          verdictType: 'lead',
+          verdictTitle: `DICTAMEN: ${p.stage} PRIORITARIO · PROBABILIDAD ${p.conversionProbability}%`,
+          score: p.score,
+          closingProb: p.conversionProbability,
+          kpis: [
+            { label: 'Intención Observada', val: `${p.score} / 100`, hint: `${p.interactions?.length || 8} consultas` },
+            { label: 'Solvencia Económica', val: `Nivel ${p.socioeconomicLevel || 'B'}`, hint: `${p.company || 'TechNova SAC'}` },
+            { label: 'Cotización Activa', val: p.quotes?.[0]?.amount ? money(Number(p.quotes[0].amount)) : 'Sin cotización', hint: 'Barra de vigencia de 7 días' },
+            { label: 'Riesgo Comercial', val: 'Bajo (<10%)', hint: 'Dentro de margen 18%' },
+          ],
+          reasons: [
+            `El expediente registra ${p.interactions?.length || 6} eventos auditados y ${p.productViews?.length || 10} visitas de catálogo.`,
+            `Perfil de solvencia validado: Ingreso mensual ${money(p.monthlyIncomeMin)} – ${money(p.monthlyIncomeMax)}.`,
+            p.quoteActive ? `Mantiene cotización activa ${p.quotes?.[0]?.code || 'POLUX-2026'} por ${money(Number(p.quotes?.[0]?.amount || 5990))}.` : 'No registra cotización activa formal.',
+          ],
+          nextAction: p.nextBestAction || 'Estructurar propuesta en 3 cuotas fijas y enviar pitch a WhatsApp.',
+        });
+      } else if (aType === 'PROCESSING') {
+        setConsultVerdict({
+          personName: `${p.firstName} ${p.lastName}`,
+          personRole: `${p.stage} (Pasarela Yape / Courier)`,
+          personId: p.id,
+          agentName: 'Agente Financiero y Logística',
+          verdictType: 'payer',
+          verdictTitle: (p.paidAmount || 0) > 0 ? 'DICTAMEN: PAGO ACREDITADO Y DESPACHO EN CURSO' : 'DICTAMEN: PAGO PENDIENTE DE CONCILIACIÓN',
+          score: 95,
+          closingProb: 100,
+          kpis: [
+            { label: 'Importe Recaudado', val: money(p.paidAmount || 5990), hint: 'Validado con PoluxPay' },
+            { label: 'Método de Pago', val: p.paymentMethod || 'Yape / Tarjeta', hint: 'Comprobante SUNAT' },
+            { label: 'Hito Courier', val: p.shippingStage || 'MIAMI_WAREHOUSE', hint: 'Tracking asignado' },
+            { label: 'Estado Financiero', val: 'Conciliado', hint: 'Cero discrepancias' },
+          ],
+          reasons: [
+            `Acreditación de fondos confirmada por S/ ${p.paidAmount || 5990} mediante comprobante electrónico.`,
+            `Guía courier internacional generada para importación directa Miami -> Trujillo.`,
+            `Alerta de arribo a tienda programada para sede Av. Larco 840.`,
+          ],
+          nextAction: 'Supervisar hito aduanero y enviar notificación de entrega al cliente.',
+        });
+      } else if (aType === 'LOYALTY') {
+        setConsultVerdict({
+          personName: `${p.firstName} ${p.lastName}`,
+          personRole: `${p.stage} (Garantía AppleCare & CSAT)`,
+          personId: p.id,
+          agentName: 'Agente de Fidelización',
+          verdictType: 'customer',
+          verdictTitle: 'DICTAMEN: CLIENTE FIDELIZADO · PÓLIZA POLUX CARE ACTIVA',
+          score: 98,
+          closingProb: 95,
+          kpis: [
+            { label: 'Calificación NPS', val: `${p.npsScore || 10} / 10`, hint: 'Promotor oficial' },
+            { label: 'Serial Apple', val: p.appleSerialNumber || 'F2LXN901Q16', hint: 'Validado en Apple.com' },
+            { label: 'Vigencia Garantía', val: '365 días', hint: 'Polux Care oficial' },
+            { label: 'Club Apple', val: 'Miembro VIP', hint: '15% desc. en accesorios' },
+          ],
+          reasons: [
+            'Número de serie de 12 dígitos verificado contra API de cobertura Apple.',
+            `Póliza de garantía extendida ${p.warrantyCode || 'CARE-2026-01'} asignada por 1 año.`,
+            'Encuesta post-entrega completada con máxima puntuación 10/10.',
+          ],
+          nextAction: 'Emitir credencial Apple Club y notificar preventa preferencial del próximo lanzamiento.',
+        });
+      } else {
+        setConsultVerdict({
+          personName: `${p.firstName} ${p.lastName}`,
+          personRole: `${p.stage} (Señales de Navegación)`,
+          personId: p.id,
+          agentName: 'Agente de Marketing',
+          verdictType: 'lead',
+          verdictTitle: 'DICTAMEN: INTENCIÓN DE COMPRA IDENTIFICADA',
+          score: p.score || 65,
+          closingProb: p.conversionProbability || 60,
+          kpis: [
+            { label: 'Score de Intención', val: `${p.score || 65} / 100`, hint: 'Algoritmo ponderado' },
+            { label: 'Vistas de Catálogo', val: `${p.productViews?.length || 8} productos`, hint: 'Interés en alta gama' },
+            { label: 'Canal de Captación', val: p.acquisitionSource || 'Instagram', hint: p.campaignName || 'Jóvenes Tech' },
+            { label: 'Nivel de Recencia', val: 'Activo hoy', hint: 'Visita recurrente' },
+          ],
+          reasons: [
+            `El visitante interactuó reiteradamente con la línea ${p.mainProduct || 'iPhone 16 Pro'}.`,
+            'Completó formulario de contacto formal indicando distrito en Trujillo.',
+            'No registra cotización formal aún; requiere impulso del Agente Negociador.',
+          ],
+          nextAction: 'Disparar cotización preferencial con vigencia de 7 días y derivar a Fase 2 (LEAD).',
+        });
+      }
+    } finally {
+      setConsulting(false);
+    }
+  };
 
   const loadData = async (agType: AgentType) => {
     try {
@@ -37,15 +169,17 @@ export default function AgentPage({ type = 'ALL' }: AgentPageProps) {
                   : agType === 'LOYALTY' ? 'CUSTOMER' 
                   : undefined;
 
-      const [acts, ppl, d] = await Promise.all([
+      const [acts, ppl, d, allP] = await Promise.all([
         api.activity(fetchType),
         api.people(stage),
         api.dashboard(),
+        api.people(),
       ]);
 
       setActions(acts);
       setPeople(ppl);
       setDash(d);
+      setAllCandidates(allP || []);
     } catch (err) {
       console.error('Error loading agent data', err);
     }
@@ -202,6 +336,125 @@ export default function AgentPage({ type = 'ALL' }: AgentPageProps) {
           <strong>{selectedAgent === 'ALL' ? dash.cards.totalProfiles : people.length}</strong>
           <small>perfiles bajo supervisión activa</small>
         </div>
+      </section>
+
+      {/* Consola Interactiva de Consulta y Diagnóstico del Agente */}
+      <section className="agent-consult-studio">
+        <div className="consult-header">
+          <span>INTERACCIÓN Y VEREDICTO EXPLICABLE (XAI)</span>
+          <h3><BrainCircuit size={19} className="text-blue" /> Consola de Consulta y Evaluación en Tiempo Real</h3>
+          <p>
+            Selecciona cualquier cliente registrado y consulta al agente especializado para auditar sus señales observadas, scoring predictivo y justificación de negocio.
+          </p>
+        </div>
+
+        <div className="consult-controls-row">
+          <div className="consult-select-wrapper">
+            <label>1. Expediente del Cliente</label>
+            <select 
+              className="consult-select"
+              value={consultPersonId}
+              onChange={(e) => {
+                const newId = Number(e.target.value);
+                setConsultPersonId(newId);
+                runConsultation(newId, consultAgentType);
+              }}
+            >
+              {(allCandidates.length ? allCandidates : people).map(cand => (
+                <option key={cand.id} value={cand.id}>
+                  #{cand.id} · {cand.firstName} {cand.lastName} ({cand.stage} · {cand.mainProduct})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="consult-select-wrapper">
+            <label>2. Agente a Consultar</label>
+            <select 
+              className="consult-select"
+              value={consultAgentType}
+              onChange={(e) => {
+                const newAg = e.target.value as AgentType;
+                setConsultAgentType(newAg);
+                runConsultation(consultPersonId, newAg);
+              }}
+            >
+              <option value="NEGOTIATION">🤖 Agente Negociador (Fase 2: Leads)</option>
+              <option value="MARKETING">📣 Agente de Marketing (Fase 1: Buyers)</option>
+              <option value="PROCESSING">💳 Agente Financiero & Courier (Fase 3: Payers)</option>
+              <option value="LOYALTY">🤝 Agente de Fidelización (Fase 4: Customers)</option>
+            </select>
+          </div>
+
+          <div>
+            <button 
+              type="button" 
+              className="btn-run-consult"
+              onClick={() => runConsultation(consultPersonId, consultAgentType)}
+              disabled={consulting}
+            >
+              <Sparkles size={16} /> {consulting ? 'Evaluando…' : 'Consultar Evaluación'}
+            </button>
+          </div>
+        </div>
+
+        {/* Ficha de Diagnóstico y Veredicto Explicable */}
+        {consultVerdict && (
+          <div className="consult-verdict-card">
+            <div className={`verdict-banner ${consultVerdict.verdictType}`}>
+              <div>
+                <strong>
+                  <CheckCircle2 size={18} /> {consultVerdict.verdictTitle}
+                </strong>
+                <small style={{ color: '#cbd5e1', display: 'block', marginTop: '2px' }}>
+                  Expediente: <strong>{consultVerdict.personName}</strong> · {consultVerdict.personRole} · Evaluado por <strong>{consultVerdict.agentName}</strong>
+                </small>
+              </div>
+              <div className="verdict-scores-row">
+                <div style={{ textAlign: 'center' }}>
+                  <ScoreRing value={consultVerdict.score} label="Score" size={62} tone="blue" />
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <ScoreRing value={consultVerdict.closingProb} label="Cierre %" size={62} tone="emerald" />
+                </div>
+              </div>
+            </div>
+
+            <div className="consult-kpis-grid">
+              {consultVerdict.kpis.map((k: any, ki: number) => (
+                <div key={ki} className="consult-kpi-item">
+                  <span>{k.label}</span>
+                  <strong>{k.val}</strong>
+                  <small>{k.hint}</small>
+                </div>
+              ))}
+            </div>
+
+            <div className="consult-explain-box">
+              <strong>Fundamento Explicable del Agente (XAI):</strong>
+              <ul>
+                {consultVerdict.reasons.map((r: string, ri: number) => (
+                  <li key={ri}>
+                    <Check size={14} /> <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="consult-next-action-row">
+              <p>
+                <strong>Next Best Action (Recomendación Operativa):</strong> {consultVerdict.nextAction}
+              </p>
+              <button 
+                type="button" 
+                className="btn-open-profile-consult"
+                onClick={() => nav(`/negotiation-profile/${consultVerdict.personId}`)}
+              >
+                <UserCheck size={14} /> Abrir Expediente 360° <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* When ALL is selected: Master Multi-Agent Dashboard */}

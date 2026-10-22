@@ -1,0 +1,178 @@
+/* =====================================================================
+   Capa de refinamiento UX/UI — Plataforma interna Polux
+   Estética "Apple dark" (grafito), jerarquía tipográfica clara,
+   superficies sobrias y foco accesible. Se carga DESPUÉS de index.css.
+   ===================================================================== */
+:root {
+  --bg: #0b0b0d;
+  --bg-subtle: #141416;
+  --card-bg: #1c1c1e;
+  --card-hover: #242427;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-focus: #0a84ff;
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1a6;
+  --text-muted: #6e6e73;
+  --primary: #0a84ff;
+  --primary-hover: #409cff;
+  --blue: #0a84ff;
+  --emerald: #30d158;
+  --amber: #ff9f0a;
+  --purple: #bf5af2;
+  --red: #ff453a;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+}
+
+body { letter-spacing: -0.005em; }
+::selection { background: rgba(10, 132, 255, 0.35); }
+
+/* Scrollbars discretos */
+* { scrollbar-width: thin; scrollbar-color: #3a3a3c transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: #3a3a3c; border-radius: 10px; border: 3px solid transparent; background-clip: content-box; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Foco accesible y consistente */
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---------- Shell ---------- */
+.sidebar {
+  background: rgba(22, 22, 24, 0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+.brand-mark { background: linear-gradient(180deg, #2c2c2e, #1c1c1e); border: 1px solid var(--border); border-radius: 10px; }
+.brand strong { letter-spacing: 0.01em; font-weight: 600; }
+.env-pill { background: transparent; border-color: var(--border); border-radius: 999px; }
+.nav-section { color: #636366; font-weight: 600; letter-spacing: 0.06em; padding-top: 18px; }
+.nav-item { border-radius: 8px; font-size: 13px; padding: 8px 10px; border-left: 0 !important; }
+.nav-item:hover { background: rgba(255, 255, 255, 0.06); }
+.nav-item.active { background: rgba(10, 132, 255, 0.16); color: #fff; }
+.nav-item.active svg { color: var(--primary); }
+.nav-item .nav-arrow { display: none; }
+.nav-stage-badge { background: rgba(255,255,255,.06) !important; color: var(--text-secondary) !important; border: 0 !important; border-radius: 999px !important; font-weight: 500 !important; }
+.system-footer-card { background: transparent; border-color: var(--border); border-radius: 12px; }
+.system-footer-card .r-label { color: var(--text-muted); }
+
+.topbar {
+  height: 64px;
+  background: rgba(11, 11, 13, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar h1 { font-size: 16px; letter-spacing: -0.01em; }
+.top-status { border-radius: 999px; background: transparent; }
+.topbar-right-actions button { border-radius: 999px !important; }
+
+.content { padding: 28px 32px 72px; }
+
+/* ---------- Superficies ---------- */
+.card, .panel, .table-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+.hero-panel {
+  background: radial-gradient(120% 140% at 0% 0%, #1f2a3d 0%, #161618 55%) !important;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+}
+.hero-panel h2, .section-header h2 { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+.hero-panel p, .section-header p { font-size: 14px; line-height: 1.55; }
+.hero-agent { background: rgba(255,255,255,.04); border-color: var(--border); border-radius: 14px; }
+.agent-big-icon { background: rgba(10,132,255,.16); color: var(--primary); border-radius: 12px; }
+.eyebrow, .breadcrumbs { letter-spacing: 0.06em; font-weight: 600; }
+.eyebrow.accent, .breadcrumbs { color: var(--primary); }
+
+.panel-title span { letter-spacing: .06em; font-weight: 600; color: var(--text-muted); }
+.panel-title h3 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+
+.metric-card, .stat-card { transition: background .2s, transform .2s; }
+.metrics-grid > div[style*="cursor"]:hover .metric-card,
+.metric-card:hover { background: var(--card-hover); }
+.stat-value, .metric-value { font-size: 28px; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+/* ---------- Botones ---------- */
+.btn, .btn-primary, .btn-secondary, .btn-table-action {
+  border-radius: 999px !important;
+  font-weight: 500;
+  transition: background .15s, opacity .15s, transform .1s;
+}
+.btn:active, .btn-primary:active, .btn-secondary:active, .btn-table-action:active { transform: scale(.98); }
+.btn.primary, .btn-primary, .btn-table-action.primary { background: var(--primary) !important; color: #fff !important; border-color: transparent !important; }
+.btn.primary:hover, .btn-primary:hover { background: var(--primary-hover) !important; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---------- Tablas ---------- */
+.app-shell table { border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+.app-shell thead th {
+  background: #161618 !important;
+  color: var(--text-muted) !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border) !important;
+  position: sticky; top: 0; z-index: 1;
+}
+.app-shell tbody td { border-bottom: 1px solid var(--border) !important; }
+.app-shell tbody tr { transition: background .12s; }
+.app-shell tbody tr:hover { background: rgba(255,255,255,.035); }
+
+/* ---------- Formularios ---------- */
+.app-shell :is(input:not([type=radio]):not([type=checkbox]):not([type=range]), select, textarea) {
+  background: #141416;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.app-shell :is(input:not([type=radio]):not([type=checkbox]):not([type=range]), select, textarea):focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(10,132,255,.25);
+  outline: none;
+}
+
+/* ---------- Estados de carga / error ---------- */
+.skeleton-page {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  min-height: 50vh; color: var(--text-secondary); font-size: 14px;
+}
+.skeleton-page::before {
+  content: ''; width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.15); border-top-color: var(--primary);
+  animation: polux-spin .8s linear infinite;
+}
+@keyframes polux-spin { to { transform: rotate(360deg); } }
+.error-state {
+  margin: 40px auto; max-width: 520px; text-align: center; padding: 32px;
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
+}
+.error-state h3 { font-size: 18px; margin-bottom: 8px; }
+.error-state p { color: var(--text-secondary); font-size: 14px; margin-bottom: 18px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1200px) {
+  .metrics-grid.four, .metrics-row.four-cards { grid-template-columns: repeat(2, 1fr); }
+  .two-col, .two-col.wide-left, .two-col.wide-right { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .app-shell { grid-template-columns: 1fr; }
+  .sidebar { position: static; width: auto; height: auto; }
+  .main-area { grid-column: 1; }
+  .topbar { height: auto; padding: 14px 18px; flex-wrap: wrap; gap: 10px; }
+  .content { padding: 20px 16px 60px; }
+  .hero-panel { flex-direction: column; align-items: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

@@ -7,9 +7,9 @@ import * as sql from 'mssql';
 async function ensureDatabase() {
   const host = process.env.DB_HOST || 'localhost';
   const port = Number(process.env.DB_PORT || 1433);
-  const user = process.env.DB_USER || 'sa';
+  const user = process.env.DB_USER || 'polux_app';
   const password = process.env.DB_PASSWORD || 'PoluxDemo_2026!';
-  const dbName = process.env.DB_NAME || 'POLUX_OLTP';
+  const dbName = process.env.DB_NAME || 'PoluxImportDB';
   const cfg: any = {
     server: host, port, user, password, database: 'master',
     options: { encrypt: false, trustServerCertificate: true },

@@ -17,7 +17,7 @@ export default function PeoplePage({ stage }: { stage: 'BUYER' | 'LEAD' }) {
   const nav = useNavigate();
 
   const loadData = () => {
-    api.people(stage).then(setPeople).finally(() => setLoading(false));
+    api.people(stage).then(setPeople).catch(() => setPeople([])).finally(() => setLoading(false));
   };
 
   useEffect(() => {

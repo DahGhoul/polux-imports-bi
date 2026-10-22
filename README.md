@@ -1,206 +1,119 @@
-# POLUX AI PLATFORM
-
-Plataforma web académica para **Polux Imports**, enfocada en los apartados **3.6 BUYERS — Agente de Marketing** y **4.6 LEADS — Agente Negociador** del Trabajo 01 de Inteligencia de Negocios.
-
-La aplicación está preparada como una demo operacional real: usa **React + TypeScript**, **NestJS**, **Microsoft SQL Server 2022** y **Docker Compose**. Los datos son **sintéticos** y se cargan automáticamente para poder exponer el sistema sin depender de integraciones externas.
-
-## Qué incluye
-
-### BUYERS — Agente de Marketing
-
-- Listado de personas potenciales con búsqueda y prioridad.
-- Perfil 360° con datos personales, laborales, universidad, NSE, intereses, presupuesto, producto principal, canal y fuente de adquisición.
-- Comportamiento observado: vistas de producto, consultas, formularios, cotizaciones e historial.
-- Score explicable de intención comercial.
-- Motor de reglas para detectar intención explícita.
-- Simulación de eventos en vivo.
-- Transición automática **BUYER → LEAD** conservando todo el historial.
-- Trazabilidad de decisiones del agente.
-
-### LEADS — Agente Negociador
-
-- Perfil comercial 360° heredado desde BUYERS.
-- Prioridad ALTA / MEDIA / BAJA.
-- Probabilidad estimada de conversión.
-- Cotización vigente.
-- Recomendación de siguiente mejor acción.
-- Generación de 3 alternativas de propuesta comercial.
-- Guardrails: descuentos especiales y reclamos se escalan a humano.
-- Simulación de confirmación del primer pago y transición **LEAD → PAYER**.
-
-### BI / Inteligencia de Negocios
-
-- Dashboard operacional de embudo.
-- KPI de BUYERS según el informe.
-- Rendimiento de campañas simuladas.
-- SQL Server OLTP: `POLUX_OLTP`.
-- Scripts opcionales para un futuro `POLUX_DW` dimensional y ETL en `database/bi/`.
+# POLUX AI PLATFORM · POLUX IMPORTS S.A.C.
+> **Sistema Transaccional OLTP, Data Mart Dimensional y Plataforma Web de Inteligencia Comercial**  
+> Proyecto Universitario de Inteligencia de Negocios · Metodología IMPULSE · Trujillo, Perú
 
 ---
 
-# Inicio rápido con Docker Desktop
+## 🚀 Resumen del Proyecto
 
-## Requisitos
+Plataforma integral desarrollada para la importación y comercialización de tecnología Apple original (iPhone 16 Pro, MacBook M4, iPad Air, Apple Watch Series 10 y AirPods) traída directamente de Miami a Trujillo.
 
-- Docker Desktop abierto.
-- Docker Compose habilitado.
-- Puertos libres: `8080`, `3000` y `1433`.
-- Recomendado: 4 GB o más de memoria disponible para Docker, porque SQL Server es el contenedor más pesado.
-
-## Opción 1 — Windows, doble clic
-
-Ejecutar:
-
-```text
-INICIAR_POLUX.bat
-```
-
-Al terminar el primer build, abrir:
-
-```text
-http://localhost:8080
-```
-
-## Opción 2 — Terminal
-
-Desde la carpeta del proyecto:
-
-```bash
-docker compose up -d --build
-```
-
-Luego:
-
-- Aplicación: http://localhost:8080
-- API: http://localhost:3000/api/health
-- Swagger: http://localhost:3000/docs
-- SQL Server: localhost:1433
-
-Credenciales SQL Server de la demo:
-
-```text
-Servidor: localhost,1433
-Usuario: sa
-Password: PoluxDemo_2026!
-Base: POLUX_OLTP
-```
-
-> Para cambiar la contraseña, copiar `.env.example` como `.env` y editar `MSSQL_SA_PASSWORD` antes del primer arranque.
-
-## Ver logs
-
-```bash
-docker compose logs -f
-```
-
-## Detener
-
-```bash
-docker compose down
-```
-
-Para conservar los datos, usar el comando anterior. Para borrar también el volumen SQL y volver a crear todo desde cero:
-
-```bash
-docker compose down -v
-```
+El sistema implementa el ciclo de vida completo del cliente (**BUYERS → LEADS → PAYERS → CUSTOMERS → TURNED**) con trazabilidad 360°, automatización con agentes inteligentes y análisis en tiempo real sobre más de **1.38 millones de registros** en SQL Server 2022.
 
 ---
 
-# Flujo recomendado para la exposición
-
-1. Abrir **Overview** y explicar el embudo operacional.
-2. Entrar a **Buyers**.
-3. Buscar **Valeria Mendoza**.
-4. Abrir su perfil 360° y enseñar gustos, presupuesto, producto, comportamiento y score.
-5. Presionar **Simular precio final** o **Solicitar cotización**.
-6. El sistema detectará intención explícita y la persona cambiará automáticamente de **BUYER → LEAD**.
-7. Ir a **Leads** y abrir el mismo perfil; todo su historial seguirá disponible.
-8. Ejecutar el **Agente Negociador** y enseñar prioridad, probabilidad de cierre y siguiente mejor acción.
-9. Presionar **Generar propuesta** para mostrar tres alternativas.
-10. Opcional: **Simular primer pago**, demostrando que el cambio **LEAD → PAYER** solo ocurre tras la confirmación del módulo de pagos.
-11. Abrir **Marketing Agent** y **Negotiation Agent** para mostrar las decisiones auditables.
-12. Abrir **Analytics & KPI** para conectar la solución con Inteligencia de Negocios y ETL.
-
-Si Valeria ya fue promovida durante una prueba anterior, en **Analytics & KPI** usar **Reiniciar demo** para restaurar todos los datos sintéticos.
-
----
-
-# Arquitectura
-
-```text
-React + TypeScript
-       │
-       ▼
-     Nginx
-       │ /api
-       ▼
-NestJS + TypeORM
-       │
-       ▼
-SQL Server 2022
-   POLUX_OLTP
-       │
-       ├── persons
-       ├── interactions
-       ├── product_views
-       ├── quotes
-       ├── funnel_transitions
-       ├── agent_actions
-       └── campaigns
-       │
-       ▼
- Futuro proceso ETL
-       │
-       ▼
-   POLUX_DW
-```
-
-El diseño evita duplicar a una persona por cada fase. La misma persona conserva su identidad y cambia su campo `stage` entre `BUYER`, `LEAD`, `PAYER`, etc. Cada transición queda registrada en `funnel_transitions`.
-
----
-
-# Motor de agentes
-
-La demo no depende de una API externa de IA. Esto es deliberado para que la exposición funcione incluso sin credenciales o internet.
-
-El comportamiento se implementa mediante:
-
-1. **Datos persistentes** de la persona.
-2. **Reglas explicables** de intención comercial.
-3. **Scoring** calculado con señales observables.
-4. **Estado del embudo**.
-5. **Acciones auditables** almacenadas en `agent_actions`.
-6. **Guardrails** para decisiones que requieren revisión humana.
-
-Después se puede conectar un LLM como capa adicional para resumir conversaciones o redactar mensajes, sin cambiar el modelo principal del sistema.
-
----
-
-# Estructura del proyecto
+## 📦 Estructura del Entregable
 
 ```text
 polux-ai-platform/
-├── backend/                 NestJS + TypeORM
-│   └── src/
-│       ├── entities/
-│       ├── services/
-│       └── controllers/
-├── frontend/                React + Vite
-│   └── src/
-│       ├── components/
-│       ├── pages/
-│       └── lib/
-├── database/
-│   └── bi/                  Modelo dimensional y ETL propuestos
-├── docs/
-│   ├── ARQUITECTURA.md
-│   └── GUIA_DEMO.md
-├── docker-compose.yml
-├── INICIAR_POLUX.bat
-└── DETENER_POLUX.bat
+├── bd/                                  # Scripts oficiales SQL Server 2022
+│   ├── EJECUTAR_TODO_BD.bat             # Despliegue automático de toda la BD (1 clic)
+│   ├── 00_fase0_nucleo_compartido.sql   # DDL Esquema core (personas, catálogos, agentes)
+│   ├── 01_fase1_buyers.sql              # DDL Esquema buyers (eventos, consultas, formularios)
+│   ├── 02_fase2_leads.sql               # DDL Esquema leads (intención, cotizaciones, propuestas)
+│   ├── 03_fase3_payers.sql              # DDL Esquema payers (órdenes, cuotas, pagos PoluxPay)
+│   ├── 04_fase4_customers.sql           # DDL Esquema customers (pedidos, inspección, entregas)
+│   ├── 05_fase5_turned.sql              # DDL Esquema turned (encuestas NPS, fidelización)
+│   ├── 06_poblacion_masiva_1M.sql       # DML 1,387,610+ registros generados por conjuntos
+│   ├── 07_modelo_dimensional_poluxmart.sql # DDL Data Mart Estrella (PoluxImportMart)
+│   ├── 08_etl_merge_poluxmart.sql       # ETL con MERGE hacia dimensiones y hechos
+│   └── 09_reparar_codificacion_utf8.sql # Corrección UTF-8 (tildes y caracteres especiales)
+├── backend/                             # API REST en NestJS + TypeORM + SQL Server
+│   ├── src/controllers/                 # Controladores REST (/proyectobi)
+│   └── src/services/                    # Lógica de agentes, embudo y reportes BI
+├── frontend/                            # Aplicación React + Vite + Apple Design System
+│   ├── src/pages/                       # Landing Apple, Dashboard, Fases y BI Analytics
+│   ├── src/components/                  # Pasarela PoluxPay, Guía Demostrativa y Layout
+│   └── src/refine.css                   # Capa estética refinada estilo Apple Graphite
+├── INICIAR_POLUX.bat                    # Script para levantar backend y frontend localmente
+├── DETENER_POLUX.bat                    # Script para detener los servicios
+├── docker-compose.yml                   # Orquestación opcional en contenedores
+└── README.md                            # Guía de instalación y uso
 ```
 
-## Nota sobre los datos
+---
 
-Todos los nombres, números, presupuestos, interacciones y comportamientos cargados por el seed son **ficticios/sintéticos** y existen únicamente para la demostración académica. Cuando Polux Imports opere realmente, el seed puede deshabilitarse y las mismas tablas pueden alimentarse desde formularios, landing pages, web analytics, WhatsApp Business u otras integraciones.
+## 🗄️ 1. Base de Datos (`PoluxImportDB` y `PoluxImportMart`)
+
+### Despliegue Rápido en SQL Server 2022
+1. Abrir la carpeta `bd/`.
+2. Ejecutar con doble clic:
+   ```cmd
+   EJECUTAR_TODO_BD.bat
+   ```
+   *(O desde PowerShell/CMD: `sqlcmd -S localhost -E -I -f 65001 -i bd\EJECUTAR_TODO_BD.bat`)*
+
+### Estadísticas de Población Verificadas
+- **Total Registros:** `1,387,610` registros distribuidos lógicamente entre las 32 tablas.
+- **core.persona:** `80,000` clientes únicos en Trujillo (`50,000 BUYERS`, `18,000 LEADS`, `4,000 PAYERS`, `4,000 CUSTOMERS`, `4,000 TURNED`).
+- **buyers.evento_web:** `350,000` eventos en landing y formularios.
+- **buyers.consulta:** `110,000` consultas de clientes atendidas por IA / Asesores.
+- **core.historial_etapa:** `134,013` transiciones de embudo auditadas.
+- **core.accion_agente:** `100,000` bitácoras operativas de agentes autónomos.
+- **PoluxImportMart:** Data Mart dimensional poblado con `MERGE` sincronizando dimensiones (`DimPersona`, `DimTiempo`, `DimProducto`, `DimCanal`, `DimAgente`, `DimEficiencia`, `DimSatisfaccion`) y tablas de hechos (`FactCaptacionBuyers`, `FactNegociacionLeads`, `FactCobranzaPayers`, `FactOperacionesCustomers`, `FactVentasPedidos`, `FactFidelizacionTurned`).
+
+---
+
+## 💻 2. Cómo Levantar el Software
+
+### Requisitos Previos
+- **Node.js** v18+ instalado.
+- **SQL Server 2022** en ejecución en `localhost` con autenticación Windows o usuario `sa` (`PoluxDemo_2026!`).
+
+### Paso a Paso
+1. **Instalar dependencias del Backend:**
+   ```bash
+   cd backend
+   npm install
+   npm run build
+   ```
+2. **Instalar dependencias del Frontend:**
+   ```bash
+   cd ../frontend
+   npm install
+   npm run build
+   ```
+3. **Ejecutar el Sistema:**
+   - Opción 1: Ejecutar el archivo `INICIAR_POLUX.bat`.
+   - Opción 2: En dos terminales separadas:
+     ```bash
+     # Terminal 1: Backend (puerto 3000)
+     cd backend && node dist/main.js
+
+     # Terminal 2: Frontend (puerto 8080)
+     cd frontend && npm run dev -- --port 8080
+     ```
+
+4. **Navegación:**
+   - **Tienda / Landing Oficial (Estilo Apple):** [http://localhost:8080/landing](http://localhost:8080/landing)
+   - **Tablero General & BI:** [http://localhost:8080/](http://localhost:8080/)
+   - **Reportes Oficiales del Informe (Anexos 3, 4, 5 y 6):** [http://localhost:8080/analytics](http://localhost:8080/analytics)
+   - **Command Center Multi-Agente:** [http://localhost:8080/agents](http://localhost:8080/agents)
+
+---
+
+## 📊 3. Reportes Oficiales del Informe Implementados en Software
+
+Desde el módulo `/analytics` se visualizan en tiempo real los reportes requeridos:
+1. **Anexo 3 (Fase BUYERS):** Interacción y captación por canal (Enero, Febrero, Marzo × WhatsApp, Instagram, TikTok, Anuncio Pagado).
+2. **Anexo 4 (Fase BUYERS):** Resolución de consultas por tema con Agente FAQ (Autenticidad, Garantía, Tiempo de entrega, Medio de pago, Stock/precio).
+3. **Anexo 5 (Fase LEADS):** Leads e intención de compra con Agente Negociador por jerarquía de 3 niveles: Mes → Categoría Apple → Nivel de Intención.
+4. **Reporte Fase 3 (PAYERS):** Conciliación Financiera PoluxPay y Pedidos Listos en Trujillo por Mes, Modalidad y Medio de Pago (Tabla 6).
+5. **Anexo 6 (Fase CUSTOMERS):** Entregas y confirmación por modalidad (Domicilio, Punto de recojo, Transportista tercero) con cumplimiento a tiempo y actas de conformidad.
+
+---
+
+## 👥 Equipo de Trabajo
+- **Dúo 1:** Corrección de Modelos E-R y Esquemas Dimensionales.
+- **Dúo 2:** Análisis Dimensional y Fichas de Tablas de Hechos.
+- **Dúo 3 (Diego e Imanol):** Poblado Masivo de Base de Datos (1 Millón+ de Registros), Desarrollo de Software (React + NestJS) y Reportes Oficiales en Vivo.

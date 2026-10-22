@@ -6,10 +6,13 @@ import { api, money } from '../lib/api';
 import { KpiStatus, MetricCard } from '../components/Ui';
 
 export default function Dashboard(){
-  const [d,setD]=useState<any>(); const [loading,setLoading]=useState(true);
+  const [d,setD]=useState<any>(); const [loading,setLoading]=useState(true); const [err,setErr]=useState('');
   const nav = useNavigate();
-  useEffect(()=>{api.dashboard().then(setD).finally(()=>setLoading(false))},[]);
+  const load = ()=>{ setLoading(true); setErr(''); api.dashboard().then(setD).catch(()=>setErr('No se pudo conectar con el servidor (puerto 3000) o con SQL Server.')).finally(()=>setLoading(false)); };
+  useEffect(load,[]);
   if(loading) return <div className="skeleton-page">Cargando inteligencia comercial y operacional…</div>;
+  if(err || !d) return <div className="error-state"><h3>No pudimos cargar el tablero</h3><p>{err || 'Respuesta vacía del servidor.'}</p><button className="btn primary" onClick={load}>Reintentar</button></div>;
+  const n = (v:any)=> Number(v||0).toLocaleString('es-PE');
 
   const funnel=[
     {name:'BUYERS',value:d.funnel.buyers, desc:'Potenciales', color:'#3b82f6', route:'/buyers'},
@@ -45,16 +48,16 @@ export default function Dashboard(){
 
     <section className="metrics-grid four">
       <div onClick={()=>nav('/buyers')} style={{cursor:'pointer'}} title="Ver Buyers">
-        <MetricCard label="Buyers Activos" value={d.cards.buyers} sub={`${d.cards.highIntent} con alta intención`} icon={UsersRound}/>
+        <MetricCard label="Buyers Activos" value={n(d.cards.buyers)} sub={`${n(d.cards.highIntent)} con alta intención`} icon={UsersRound}/>
       </div>
       <div onClick={()=>nav('/leads')} style={{cursor:'pointer'}} title="Ver Leads">
-        <MetricCard label="Leads en Negociación" value={d.cards.leads} sub={`${d.cards.highPriorityLeads} prioridad alta`} icon={Target}/>
+        <MetricCard label="Leads en Negociación" value={n(d.cards.leads)} sub={`${n(d.cards.highPriorityLeads)} prioridad alta`} icon={Target}/>
       </div>
       <div onClick={()=>nav('/payers')} style={{cursor:'pointer'}} title="Ver Payers">
-        <MetricCard label="Payers & Envíos USA" value={d.cards.payers} sub={`${d.cards.inTransitCount || 0} en tránsito aduanero`} icon={PackageCheck}/>
+        <MetricCard label="Payers & Envíos USA" value={n(d.cards.payers)} sub={`${n(d.cards.inTransitCount)} en tránsito aduanero`} icon={PackageCheck}/>
       </div>
       <div onClick={()=>nav('/customers')} style={{cursor:'pointer'}} title="Ver Customers">
-        <MetricCard label="Satisfacción NPS Promedio" value={`${d.cards.avgNps || 9.4} / 10`} sub={`${d.cards.activeWarranties || 0} garantías de 1 año`} icon={HeartHandshake}/>
+        <MetricCard label="Satisfacción NPS Promedio" value={`${d.cards.avgNps || 9.4} / 10`} sub={`${n(d.cards.activeWarranties)} garantías de 1 año`} icon={HeartHandshake}/>
       </div>
     </section>
 
@@ -74,7 +77,7 @@ export default function Dashboard(){
               title={`Ver expedientes de ${f.name}`}
             >
               <span>{f.name}</span>
-              <strong>{f.value}</strong>
+              <strong>{n(f.value)}</strong>
               <small>{f.desc} <ArrowRight size={11} style={{display:'inline'}}/></small>
             </div>
           ))}
@@ -94,11 +97,11 @@ export default function Dashboard(){
         </div>
         <ResponsiveContainer width="100%" height={245}>
           <BarChart data={d.districts || []} margin={{left:0,right:10,bottom:10}}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#222534"/>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)"/>
             <XAxis dataKey="name" stroke="#8f96aa" tick={{fontSize:10}} interval={0}/>
             <YAxis stroke="#8f96aa" tick={{fontSize:10}}/>
-            <Tooltip contentStyle={{background:'#11131d',border:'1px solid #2a2d3d',borderRadius:8}}/>
-            <Bar dataKey="value" fill="#2563eb" radius={[6,6,0,0]}/>
+            <Tooltip contentStyle={{background:'#1c1c1e',border:'1px solid rgba(255,255,255,0.1)',borderRadius:10,color:'#f5f5f7'}}/>
+            <Bar dataKey="value" fill="#0a84ff" radius={[6,6,0,0]}/>
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -108,15 +111,15 @@ export default function Dashboard(){
       <div className="panel chart-panel">
         <div className="panel-title">
           <div><span>CATÁLOGO APPLE</span><h3>Productos más Consultados</h3></div>
-          <small>{d.interactionCount} interacciones registradas</small>
+          <small>{n(d.interactionCount)} interacciones registradas</small>
         </div>
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={d.topProducts} layout="vertical" margin={{left:10,right:20}}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#222534"/>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)"/>
             <XAxis type="number" stroke="#72778a"/>
             <YAxis dataKey="name" type="category" width={160} stroke="#aeb2c2" tick={{fontSize:11}}/>
-            <Tooltip contentStyle={{background:'#11131d',border:'1px solid #2a2d3d',borderRadius:8}}/>
-            <Bar dataKey="value" fill="#10b981" radius={[0,6,6,0]}/>
+            <Tooltip contentStyle={{background:'#1c1c1e',border:'1px solid rgba(255,255,255,0.1)',borderRadius:10,color:'#f5f5f7'}}/>
+            <Bar dataKey="value" fill="#30d158" radius={[0,6,6,0]}/>
           </BarChart>
         </ResponsiveContainer>
       </div>

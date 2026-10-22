@@ -13,7 +13,7 @@ export default function PayersPage() {
   const nav = useNavigate();
 
   const loadData = () => {
-    api.people('PAYER', search).then(setPayers).finally(() => setLoading(false));
+    api.people('PAYER', search).then(setPayers).catch(() => setPayers([])).finally(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -64,6 +64,8 @@ export default function PayersPage() {
       showToast(`Hito logístico actualizado para ${p.firstName}`);
       setSelectedPayer(updated);
       loadData();
+    } catch (e: any) {
+      showToast('No se pudo actualizar el hito logístico. Intenta nuevamente.');
     } finally {
       setActionBusy(false);
     }
@@ -81,6 +83,8 @@ export default function PayersPage() {
       };
       showToast(labels[alertType] || `Alerta impulsora enviada a ${p.firstName}`);
       loadData();
+    } catch (e: any) {
+      showToast('No se pudo enviar la alerta. Intenta nuevamente.');
     } finally {
       setActionBusy(false);
     }

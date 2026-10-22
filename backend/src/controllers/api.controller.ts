@@ -3,9 +3,6 @@ import { AgentService } from '../services/agent.service';
 import { DashboardService } from '../services/dashboard.service';
 import { PeopleService } from '../services/people.service';
 import { SeedService } from '../services/seed.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Campaign } from '../entities';
-import { Repository } from 'typeorm';
 
 @Controller()
 export class ApiController {
@@ -14,11 +11,20 @@ export class ApiController {
     private readonly agents: AgentService,
     private readonly dashboard: DashboardService,
     private readonly seed: SeedService,
-    @InjectRepository(Campaign) private readonly campaigns: Repository<Campaign>,
   ) {}
 
-  @Get('health') health() { return { ok: true, service: 'polux-ai-api', prefix: 'proyectobi', at: new Date() }; }
+  @Get('health') health() {
+    return {
+      ok: true,
+      service: 'polux-ai-api',
+      prefix: 'proyectobi',
+      oltpDatabase: 'PoluxImportDB',
+      martDatabase: 'PoluxImportMart',
+      at: new Date(),
+    };
+  }
   @Get('dashboard') dashboardData() { return this.dashboard.get(); }
+  @Get('reports') reportsData() { return this.dashboard.getReports(); }
   @Get('people') list(@Query('stage') stage?: string, @Query('search') search?: string) { return this.people.list(stage, search); }
   @Get('people/:id') get(@Param('id', ParseIntPipe) id: number) { return this.people.get(id); }
   @Post('people') create(@Body() body: any) { return this.people.create(body); }
@@ -36,6 +42,6 @@ export class ApiController {
   @Post('people/:id/support-ticket') supportTicket(@Param('id', ParseIntPipe) id: number, @Body() body: { topic: string; detail: string }) { return this.agents.createSupportTicket(id, body); }
   @Post('people/:id/ask-agent') askAgent(@Param('id', ParseIntPipe) id: number, @Body() body: { question: string }) { return this.agents.askAgent(id, body?.question || ''); }
   @Get('agents/activity') activity(@Query('type') type?: string) { return this.agents.recent(type); }
-  @Get('campaigns') campaignList() { return this.campaigns.find({ order: { reach: 'DESC' } }); }
+  @Get('campaigns') campaignList() { return this.dashboard.getCampaigns(); }
   @Post('demo/reset') reset() { return this.seed.reset(); }
 }

@@ -19,9 +19,9 @@ services:
       PORT: 3000
       DB_HOST: sqlserver
       DB_PORT: 1433
-      DB_USER: sa
+      DB_USER: polux_app
       DB_PASSWORD: ${MSSQL_SA_PASSWORD:-PoluxDemo_2026!}
-      DB_NAME: POLUX_OLTP
+      DB_NAME: PoluxImportDB
     depends_on:
       - sqlserver
     ports:

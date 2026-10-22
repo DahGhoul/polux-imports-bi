@@ -84,6 +84,7 @@ const request = async <T>(url:string, init?:RequestInit): Promise<T> => {
 
 export const api = {
   dashboard: () => request<any>('/proyectobi/dashboard'),
+  reports: () => request<any>('/proyectobi/reports'),
   people: (stage?: string, search?: string) => request<Person[]>(`/proyectobi/people?${new URLSearchParams({ ...(stage ? {stage}:{}), ...(search ? {search}: {}) }).toString()}`),
   createPerson: (data: Partial<Person>) => request<Person>('/proyectobi/people', { method: 'POST', body: JSON.stringify(data) }),
   person: (id:number) => request<Person>(`/proyectobi/people/${id}`),

@@ -27,7 +27,7 @@ export default function CustomersPage() {
   const [toast, setToast] = useState('');
 
   const loadData = () => {
-    api.people('CUSTOMER', search).then(setCustomers).finally(() => setLoading(false));
+    api.people('CUSTOMER', search).then(setCustomers).catch(() => setCustomers([])).finally(() => setLoading(false));
   };
 
   useEffect(() => {
